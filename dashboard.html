@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgriAssist Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #f1f8e9);
+      color: #333;
+    }
+
+    .dashboard {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: linear-gradient(145deg, #2e7d32, #388e3c);
+      color: white;
+      padding: 30px 20px;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 40px;
+      font-size: 24px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar li {
+      margin: 20px 0;
+    }
+
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 40px;
+      backdrop-filter: blur(10px);
+      overflow-y: auto;
+    }
+
+    header h1 {
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    header p {
+      margin-bottom: 30px;
+      font-size: 16px;
+      color: #555;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    canvas {
+      width: 100%;
+      height: 200px;
+    }
+
+    input[type="file"] {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1b5e20;
+    }
+
+    #locationOutput, #cropOutput {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <h2>🌾 AgriAssist</h2>
+      <nav>
+        <ul>
+          <li><a href="#">🌱 Crop Recommendation</a></li>
+          <li><a href="#">🦠 Disease Detection</a></li>
+          <li><a href="#">📜 Govt Schemes</a></li>
+          <li><a href="#">👥 Community</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header>
+        <h1>Welcome, Farmer 👨‍🌾</h1>
+        <p>Your smart assistant for better farming decisions</p>
+      </header>
+
+      <section class="cards">
+        <div class="card">
+          <h3>🌱 Soil Nutrient Chart</h3>
+          <canvas id="soilChart"></canvas>
+        </div>
+
+        <div class="card">
+          <h3>🖼️ Upload Soil Image</h3>
+          <input type="file" id="soilUpload" accept="image/*" />
+        </div>
+
+        <div class="card">
+          <h3>📍 Your Location</h3>
+          <button onclick="getLocation()">Get Location & Suggest Crops</button>
+          <p id="locationOutput"></p>
+          <p id="cropOutput"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Chart.js: Soil Nutrient Chart
+    const ctx = document.getElementById('soilChart').getContext('2d');
+    const soilChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Nitrogen', 'Phosphorus', 'Potassium'],
+        datasets: [{
+          label: 'Soil Nutrient Levels',
+          data: [45, 30, 60],
+          backgroundColor: ['#66bb6a', '#42a5f5', '#ffa726']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: {
+            display: true,
+            text: 'Soil Composition'
+          }
+        }
+      }
+    });
+
+    // Geolocation API + Crop Suggestion
+    function getLocation() {
+      const locationOutput = document.getElementById('locationOutput');
+      const cropOutput = document.getElementById('cropOutput');
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            locationOutput.innerText = `Latitude: ${lat.toFixed(4)}, Longitude: ${lon.toFixed(4)}`;
+
+            // Basic crop logic (can be replaced with ML model or API)
+            let crops = [];
+            if (lat >= 20 && lat <= 22 && lon >= 78 && lon <= 80) {
+              crops = ['Cotton', 'Soybean', 'Pigeon Pea', 'Sorghum', 'Chickpea', 'Wheat'];
+            } else if (lat >= 25 && lat <= 27) {
+              crops = ['Rice', 'Maize', 'Sugarcane', 'Mustard'];
+            } else {
+              crops = ['Millets', 'Groundnut', 'Barley'];
+            }
+
+            cropOutput.innerText = `Recommended Crops: ${crops.join(', ')}`;
+          },
+          error => {
+            locationOutput.innerText = 'Location access denied.';
+            cropOutput.innerText = '';
+          }
+        );
+      } else {
+        locationOutput.innerText = 'Geolocation not supported.';
+        cropOutput.innerText = '';
+      }
+    }
+
+    // File Upload Handler
+    document.getElementById('soilUpload').addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        alert(`File "${file.name}" selected for upload.`);
+        // You can send this to Flask/Django backend using FormData
+      }
+    });
+  </script>
+</body>
+</html>
