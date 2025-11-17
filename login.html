@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgriAssist - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #f1f8e9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #333;
+    }
+
+    .login-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-container h1 {
+      margin-bottom: 10px;
+      color: #2e7d32;
+      font-size: 28px;
+    }
+
+    .login-container p {
+      margin-bottom: 30px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #2e7d32;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(45deg, #2e7d32, #4caf50);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    .login-btn:hover {
+      background: linear-gradient(45deg, #1b5e20, #388e3c);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+    }
+
+    .register-link {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .register-link a {
+      color: #4caf50;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+
+    .error-message {
+      color: #d32f2f;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .success-message {
+      color: #2e7d32;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1><i class="fas fa-seedling"></i> AgriAssist</h1>
+    <p>Welcome back, Farmer! Please login to continue.</p>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+
+      <button type="submit" class="login-btn">Login</button>
+    </form>
+
+    <div class="register-link">
+      Don't have an account? <a href="#" onclick="showRegister()">Register here</a>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+    <div id="successMessage" class="success-message"></div>
+  </div>
+
+  <script>
+    // Simple user database simulation using localStorage
+    let users = JSON.parse(localStorage.getItem('agriassist_users')) || [];
+
+    // Check if user is already logged in
+    const currentUser = JSON.parse(localStorage.getItem('agriassist_current_user'));
+    if (currentUser) {
+      window.location.href = 'dashboard.html';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      const errorMessage = document.getElementById('errorMessage');
+      const successMessage = document.getElementById('successMessage');
+
+      // Hide previous messages
+      errorMessage.style.display = 'none';
+      successMessage.style.display = 'none';
+
+      // Find user
+      const user = users.find(u => u.username === username);
+
+      if (!user) {
+        errorMessage.textContent = 'User not found. Please check your username.';
+        errorMessage.style.display = 'block';
+        return;
+      }
+
+      if (user.password !== password) {
+        errorMessage.textContent = 'Incorrect password. Please try again.';
+        errorMessage.style.display = 'block';
+        return;
+      }
+
+      // Login successful
+      localStorage.setItem('agriassist_current_user', JSON.stringify({
+        username: user.username,
+        name: user.name,
+        email: user.email,
+        farmSize: user.farmSize,
+        location: user.location
+      }));
+
+      successMessage.textContent = 'Login successful! Redirecting...';
+      successMessage.style.display = 'block';
+
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 1000);
+    });
+
+    function showRegister() {
+      // Create registration form
+      const loginContainer = document.querySelector('.login-container');
+      loginContainer.innerHTML = `
+        <h1><i class="fas fa-seedling"></i> AgriAssist</h1>
+        <p>Create your farmer account</p>
+
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="regName">Full Name</label>
+            <input type="text" id="regName" name="name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="regUsername">Username</label>
+            <input type="text" id="regUsername" name="username" required>
+          </div>
+
+          <div class="form-group">
+            <label for="regEmail">Email</label>
+            <input type="email" id="regEmail" name="email" required>
+          </div>
+
+          <div class="form-group">
+            <label for="regPassword">Password</label>
+            <input type="password" id="regPassword" name="password" required>
+          </div>
+
+          <div class="form-group">
+            <label for="regFarmSize">Farm Size (acres)</label>
+            <input type="number" id="regFarmSize" name="farmSize" min="0" step="0.1">
+          </div>
+
+          <div class="form-group">
+            <label for="regLocation">Location</label>
+            <input type="text" id="regLocation" name="location" placeholder="City, State">
+          </div>
+
+          <button type="submit" class="login-btn">Register</button>
+        </form>
+
+        <div class="register-link">
+          Already have an account? <a href="#" onclick="showLogin()">Login here</a>
+        </div>
+
+        <div id="regErrorMessage" class="error-message"></div>
+        <div id="regSuccessMessage" class="success-message"></div>
+      `;
+
+      // Add registration form handler
+      document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById('regName').value.trim();
+        const username = document.getElementById('regUsername').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const farmSize = document.getElementById('regFarmSize').value;
+        const location = document.getElementById('regLocation').value.trim();
+
+        const regErrorMessage = document.getElementById('regErrorMessage');
+        const regSuccessMessage = document.getElementById('regSuccessMessage');
+
+        // Hide previous messages
+        regErrorMessage.style.display = 'none';
+        regSuccessMessage.style.display = 'none';
+
+        // Validation
+        if (password.length < 6) {
+          regErrorMessage.textContent = 'Password must be at least 6 characters long.';
+          regErrorMessage.style.display = 'block';
+          return;
+        }
+
+        // Check if username already exists
+        if (users.some(u => u.username === username)) {
+          regErrorMessage.textContent = 'Username already exists. Please choose a different one.';
+          regErrorMessage.style.display = 'block';
+          return;
+        }
+
+        // Create new user
+        const newUser = {
+          name,
+          username,
+          email,
+          password,
+          farmSize: farmSize ? parseFloat(farmSize) : null,
+          location,
+          createdAt: new Date().toISOString()
+        };
+
+        users.push(newUser);
+        localStorage.setItem('agriassist_users', JSON.stringify(users));
+
+        regSuccessMessage.textContent = 'Registration successful! You can now login.';
+        regSuccessMessage.style.display = 'block';
+
+        setTimeout(() => {
+          showLogin();
+        }, 2000);
+      });
+    }
+
+    function showLogin() {
+      location.reload(); // Simple way to reset to login form
+    }
+  </script>
+</body>
+</html>
